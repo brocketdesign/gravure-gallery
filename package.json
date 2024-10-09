@@ -1,0 +1,17 @@
+{
+  "name": "gravure-gallery",
+  "version": "1.0.0",
+  "description": "## Description (English) Gravure Gallery is a modern web application built with the MERN stack (MongoDB, Express, React, Node.js) to showcase images of famous Japanese gravure models. The images are scraped, stored, and managed in a MongoDB database, each with a title, tags, and URL. Users can browse the latest added images with infinite scroll and search by tags or keywords.",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
