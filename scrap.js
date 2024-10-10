@@ -15,6 +15,7 @@ const ImageSchema = new mongoose.Schema({
     tags: [String],
     url: String,
     category: String,
+    postUrl: String, // Track the URL of the post the image came from
     createdAt: { type: Date, default: Date.now },
 });
 
@@ -73,7 +74,7 @@ async function scrapePost(postUrl) {
             }
         });
 
-        return { title, tags, category, images };
+        return { title, tags, category, images, postUrl };
     } catch (error) {
         console.error(`Error scraping post: ${error}`);
         return null;
@@ -81,12 +82,13 @@ async function scrapePost(postUrl) {
 }
 
 // Function to save the image data to MongoDB
-async function saveImageData(title, tags, category, imageUrl) {
+async function saveImageData(title, tags, category, imageUrl, postUrl) {
     const image = new Image({
         title,
         tags,
         url: imageUrl,
         category,
+        postUrl,
     });
 
     try {
@@ -97,45 +99,69 @@ async function saveImageData(title, tags, category, imageUrl) {
     }
 }
 
-// Main scraping function
-async function scrapeSite() {
-    const sitemapUrl = 'https://everia.club/wp-sitemap-posts-post-1.xml'; // Sitemap URL for posts
-    const postUrls = await fetchSitemap(sitemapUrl);
-
-    // Limit the number of posts to scrape
-    const scrapeLimit = 50; // Set the number of posts to scrape here
-    const limitedPostUrls = postUrls.slice(0, scrapeLimit);
-
-    console.log(`Found ${limitedPostUrls.length} posts to scrape.`);
-
-    for (const postUrl of limitedPostUrls) {
-        const existingPost = await Post.findOne({ url: postUrl });
-        if (existingPost) {
-            console.log(`Post already scraped: ${postUrl}`);
-            continue;
-        }
-
-        const postData = await scrapePost(postUrl);
-        if (postData) {
-            const { title, tags, category, images } = postData;
-
-            for (const imageUrl of images) {
-                await saveImageData(title, tags, category, imageUrl);
-            }
-
-            // Save the post URL to track that it has been scraped
-            const post = new Post({ url: postUrl });
-            try {
-                await post.save();
-                console.log(`Saved post as scraped: ${postUrl}`);
-            } catch (error) {
-                console.error(`Error saving post URL: ${error}`);
-            }
-        }
+// Function to reset the database
+async function resetDatabase() {
+    try {
+        await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        await Image.deleteMany({});
+        await Post.deleteMany({});
+        console.log('Database has been reset.');
+    } catch (error) {
+        console.error(`Error resetting database: ${error}`);
+    } finally {
+        await mongoose.disconnect();
     }
-
-    console.log('Scraping complete.');
 }
 
+// Main scraping function
+async function scrapeSite() {
+    try {
+        await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        const sitemapUrl = 'https://everia.club/wp-sitemap-posts-post-1.xml'; // Sitemap URL for posts
+        const postUrls = await fetchSitemap(sitemapUrl);
+
+        // Limit the number of posts to scrape
+        const scrapeLimit = 100; // Set the number of posts to scrape here
+        const limitedPostUrls = postUrls.slice(0, scrapeLimit);
+
+        console.log(`Found ${limitedPostUrls.length} posts to scrape.`);
+
+        for (const postUrl of limitedPostUrls) {
+            const existingPost = await Post.findOne({ url: postUrl });
+            if (existingPost) {
+                console.log(`Post already scraped: ${postUrl}`);
+                continue;
+            }
+
+            const postData = await scrapePost(postUrl);
+            if (postData) {
+                const { title, tags, category, images } = postData;
+
+                for (const imageUrl of images) {
+                    await saveImageData(title, tags, category, imageUrl, postUrl);
+                }
+
+                // Save the post URL to track that it has been scraped
+                const post = new Post({ url: postUrl });
+                try {
+                    await post.save();
+                    console.log(`Saved post as scraped: ${postUrl}`);
+                } catch (error) {
+                    console.error(`Error saving post URL: ${error}`);
+                }
+            }
+        }
+
+        console.log('Scraping complete.');
+    } catch (error) {
+        console.error(`Error during scraping: ${error}`);
+    } finally {
+        await mongoose.disconnect();
+    }
+}
+
+// Uncomment to reset the database
+//resetDatabase();
+
 // Run the scraper
-scrapeSite().then(() => mongoose.disconnect());
+scrapeSite();

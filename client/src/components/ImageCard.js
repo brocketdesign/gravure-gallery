@@ -1,11 +1,25 @@
+// ImageCard.js
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 function ImageCard({ image }) {
+  const navigate = useNavigate();
+  const { i18n } = useTranslation(); // Destructure i18n to get current language
+
+  const handleClick = () => {
+    navigate(`/image/${image._id}`);
+  };
+
   return (
-    <Link to={`/image/${image._id}`}>
-      <img src={image.url} alt={image.title} className="w-full h-auto" />
-    </Link>
+    <div onClick={handleClick} className="cursor-pointer">
+      <img
+        src={image.url}
+        alt={image.title?.[i18n.language] || 'Image'}
+        className="w-full h-auto"
+      />
+    </div>
   );
 }
 

@@ -1,13 +1,20 @@
 {
-    "latest_images": "最新の画像",
-    "search": "検索",
-    "contact_us": "お問い合わせ",
-    "disclaimer": "免責事項",
-    "related_images": "関連画像",
-    "name": "名前",
-    "email": "メール",
-    "message": "メッセージ",
-    "send": "送信",
-    "disclaimer_text": "表示されるコンテンツはそれぞれの出典に属します。"
-  }
-  
+  "latest_images": "最新の画像",
+  "search": "検索",
+  "contact_us": "お問い合わせ",
+  "disclaimer": "免責事項",
+  "same_post_images": "同じ投稿の画像",
+  "related_images": "関連画像",
+  "name": "名前",
+  "email": "メール",
+  "message": "メッセージ",
+  "send": "送信",
+  "disclaimer_text": "表示されるコンテンツはそれぞれの出典に属します。",
+  "loading": "読み込み中...",
+  "no_more_images": "これ以上の画像はありません。",
+  "error_loading_images": "画像の読み込み中にエラーが発生しました。",
+  "loading_image": "画像を読み込んでいます...",
+  "image_not_found": "画像が見つかりませんでした。",
+  "error_loading_related_images": "関連画像の読み込み中にエラーが発生しました。",
+  "no_related_images": "関連画像がありません。"
+}

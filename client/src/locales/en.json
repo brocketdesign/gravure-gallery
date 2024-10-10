@@ -1,13 +1,20 @@
 {
-    "latest_images": "Latest Images",
-    "search": "Search",
-    "contact_us": "Contact Us",
-    "disclaimer": "Disclaimer",
-    "related_images": "Related Images",
-    "name": "Name",
-    "email": "Email",
-    "message": "Message",
-    "send": "Send",
-    "disclaimer_text": "The content displayed belongs to the respective sources."
-  }
-  
+  "latest_images": "Latest Images",
+  "loading": "Loading...",
+  "no_more_images": "No more images to display.",
+  "error_loading_images": "An error occurred while loading images.",
+  "same_post_images": "Same Post Images",
+  "related_images": "Related Images",
+  "loading_image": "Loading image...",
+  "image_not_found": "Image not found.",
+  "error_loading_related_images": "An error occurred while loading related images.",
+  "no_related_images": "No related images.",
+  "search": "Search",
+  "contact_us": "Contact Us",
+  "disclaimer": "Disclaimer",
+  "name": "Name",
+  "email": "Email",
+  "message": "Message",
+  "send": "Send",
+  "disclaimer_text": "The content displayed belongs to the respective sources."
+}

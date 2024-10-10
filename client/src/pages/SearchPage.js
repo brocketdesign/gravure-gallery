@@ -1,3 +1,5 @@
+// SearchPage.js
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -12,15 +14,24 @@ function SearchPage() {
   const { t } = useTranslation();
 
   const searchImages = async () => {
-    const res = await axios.get(`/api/images/search?q=${query}&page=1`);
-    setImages(res.data);
-    setPage(2);
+    try {
+      const res = await axios.get(`/api/images/search?q=${encodeURIComponent(query)}&page=1`);
+      console.log(res)
+      setImages(res.data);
+      setPage(2);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+    }
   };
 
   const fetchMoreImages = async () => {
-    const res = await axios.get(`/api/images/search?q=${query}&page=${page}`);
-    setImages([...images, ...res.data]);
-    setPage(page + 1);
+    try {
+      const res = await axios.get(`/api/images/search?q=${encodeURIComponent(query)}&page=${page}`);
+      setImages((prevImages) => [...prevImages, ...res.data]);
+      setPage(page + 1);
+    } catch (error) {
+      console.error('Error fetching more images:', error);
+    }
   };
 
   return (
@@ -44,7 +55,7 @@ function SearchPage() {
             dataLength={images.length}
             next={fetchMoreImages}
             hasMore={true}
-            loader={<h4>Loading...</h4>}
+            loader={<h4>{t('loading')}</h4>}
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {images.map((image) => (
