@@ -54,21 +54,23 @@ async function scrapePost(postUrl) {
         const $ = cheerio.load(data);
 
         // Extract post title
-        const title = $('h1.entry-title').text().trim() || $('title').text().trim();
+        const title = $('h1').text().trim() || $('title').text().trim();
 
         // Extract post tags
         const tags = [];
         $('.post-tags [rel="tag"]').each((i, el) => {
             tags.push($(el).text().trim());
         });
-
+        $('a.c-tagList__link').each((i, el) => {
+            tags.push($(el).text().trim());
+        });
         // Extract category from post
-        const category = $('a[rel="category tag"]').first().text().trim() || 'Uncategorized';
+        const category = new URL(postUrl).hostname || 'Uncategorized';
 
         // Extract images
         const images = [];
         $('img').each((i, el) => {
-            const imgSrc = $(el).attr('src');
+            const imgSrc = $(el).attr('data-src') || $(el).attr('src');
             if (imgSrc && !imgSrc.includes('logo') && !imgSrc.includes('icon')) {
                 images.push(imgSrc);
             }
@@ -114,14 +116,14 @@ async function resetDatabase() {
 }
 
 // Main scraping function
-async function scrapeSite() {
+async function scrapeSite(xmlMap) {
     try {
         await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-        const sitemapUrl = 'https://everia.club/wp-sitemap-posts-post-1.xml'; // Sitemap URL for posts
+        const sitemapUrl = xmlMap; // Sitemap URL for posts
         const postUrls = await fetchSitemap(sitemapUrl);
 
         // Limit the number of posts to scrape
-        const scrapeLimit = 100; // Set the number of posts to scrape here
+        const scrapeLimit = 10; // Set the number of posts to scrape here
         const limitedPostUrls = postUrls.slice(0, scrapeLimit);
 
         console.log(`Found ${limitedPostUrls.length} posts to scrape.`);
@@ -164,4 +166,5 @@ async function scrapeSite() {
 //resetDatabase();
 
 // Run the scraper
-scrapeSite();
+//scrapeSite('https://everia.club/wp-sitemap-posts-post-1.xml')
+//scrapeSite('https://erotok.com/sitemap-posttype-post.2024.xml');
