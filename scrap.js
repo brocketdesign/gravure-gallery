@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const mongoose = require('mongoose');
-
+const puppeteer = require('puppeteer');
 // MongoDB connection
 const MONGO_URI = 'mongodb://localhost:27017/gravure_gallery'; // Replace with your MongoDB URI
 mongoose.connect(MONGO_URI, {
@@ -30,6 +30,7 @@ const PostSchema = new mongoose.Schema({
 const Post = mongoose.model('Post', PostSchema);
 
 // Function to fetch XML Sitemap and extract post URLs
+
 async function fetchSitemap(sitemapUrl) {
     try {
         const { data } = await axios.get(sitemapUrl);
@@ -42,8 +43,27 @@ async function fetchSitemap(sitemapUrl) {
 
         return postUrls;
     } catch (error) {
-        console.error(`Error fetching sitemap: ${error}`);
-        return [];
+        console.error(`Axios error fetching sitemap: ${error}`);
+        
+        // Try with Puppeteer
+        try {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.goto(sitemapUrl);
+            const content = await page.content();
+            const $ = cheerio.load(content, { xmlMode: true });
+            const postUrls = [];
+
+            $('url loc').each((i, el) => {
+                postUrls.push($(el).text());
+            });
+
+            await browser.close();
+            return postUrls;
+        } catch (puppeteerError) {
+            console.error(`Puppeteer error fetching sitemap: ${puppeteerError}`);
+            return [];
+        }
     }
 }
 
@@ -62,6 +82,12 @@ async function scrapePost(postUrl) {
             tags.push($(el).text().trim());
         });
         $('a.c-tagList__link').each((i, el) => {
+            tags.push($(el).text().trim());
+        });
+        $('a.cat-link').each((i, el) => {
+            tags.push($(el).text().trim());
+        });
+        $('a.tag-link').each((i, el) => {
             tags.push($(el).text().trim());
         });
         // Extract category from post
@@ -123,7 +149,7 @@ async function scrapeSite(xmlMap) {
         const postUrls = await fetchSitemap(sitemapUrl);
 
         // Limit the number of posts to scrape
-        const scrapeLimit = 10; // Set the number of posts to scrape here
+        const scrapeLimit = 100; // Set the number of posts to scrape here
         const limitedPostUrls = postUrls.slice(0, scrapeLimit);
 
         console.log(`Found ${limitedPostUrls.length} posts to scrape.`);
@@ -168,3 +194,4 @@ async function scrapeSite(xmlMap) {
 // Run the scraper
 //scrapeSite('https://everia.club/wp-sitemap-posts-post-1.xml')
 //scrapeSite('https://erotok.com/sitemap-posttype-post.2024.xml');
+scrapeSite('https://bi-girl.net/post-sitemap.xml')
