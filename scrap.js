@@ -1,7 +1,8 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const mongoose = require('mongoose');
-const puppeteer = require('puppeteer');
+const fs = require('fs').promises;
+const path = require('path');
 // MongoDB connection
 const MONGO_URI = 'mongodb://localhost:27017/gravure_gallery'; // Replace with your MongoDB URI
 mongoose.connect(MONGO_URI, {
@@ -31,41 +32,37 @@ const Post = mongoose.model('Post', PostSchema);
 
 // Function to fetch XML Sitemap and extract post URLs
 
-async function fetchSitemap(sitemapUrl) {
+
+async function fetchSitemap(sitemapPath) {
     try {
-        const { data } = await axios.get(sitemapUrl);
+        let data;
+        
+        if (sitemapPath.startsWith('http')) {
+            // Fetch from remote URL
+            const response = await axios.get(sitemapPath);
+            data = response.data;
+        } else {
+            // Read from local file
+            const filePath = path.resolve(sitemapPath);
+            data = await fs.readFile(filePath, 'utf-8');
+        }
+        
         const $ = cheerio.load(data, { xmlMode: true });
+        console.log($('html').html())
         const postUrls = [];
 
         $('url loc').each((i, el) => {
             postUrls.push($(el).text());
         });
-
+        
         return postUrls;
     } catch (error) {
-        console.error(`Axios error fetching sitemap: ${error}`);
-        
-        // Try with Puppeteer
-        try {
-            const browser = await puppeteer.launch();
-            const page = await browser.newPage();
-            await page.goto(sitemapUrl);
-            const content = await page.content();
-            const $ = cheerio.load(content, { xmlMode: true });
-            const postUrls = [];
-
-            $('url loc').each((i, el) => {
-                postUrls.push($(el).text());
-            });
-
-            await browser.close();
-            return postUrls;
-        } catch (puppeteerError) {
-            console.error(`Puppeteer error fetching sitemap: ${puppeteerError}`);
-            return [];
-        }
+        console.error(`Error fetching sitemap: ${error}`);
+        return [];
     }
 }
+
+
 
 // Function to scrape each post for images, title, and tags
 async function scrapePost(postUrl) {
@@ -194,4 +191,4 @@ async function scrapeSite(xmlMap) {
 // Run the scraper
 //scrapeSite('https://everia.club/wp-sitemap-posts-post-1.xml')
 //scrapeSite('https://erotok.com/sitemap-posttype-post.2024.xml');
-scrapeSite('https://bi-girl.net/post-sitemap.xml')
+//scrapeSite('https://oppaisan.com/sitemap-pt-post-2024-10.xml')
