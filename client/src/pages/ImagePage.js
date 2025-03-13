@@ -28,7 +28,6 @@ function ImagePage() {
     setHasMore(true);
     setLoading(true);
     fetchImageData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchImageData = async () => {

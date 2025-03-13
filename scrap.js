@@ -189,6 +189,6 @@ async function scrapeSite(xmlMap) {
 //resetDatabase();
 
 // Run the scraper
-//scrapeSite('https://everia.club/wp-sitemap-posts-post-1.xml')
-//scrapeSite('https://erotok.com/sitemap-posttype-post.2024.xml');
-//scrapeSite('https://oppaisan.com/sitemap-pt-post-2024-10.xml')
+scrapeSite('https://everia.club/wp-sitemap-posts-post-1.xml')
+scrapeSite('https://erotok.com/sitemap-posttype-post.2024.xml');
+scrapeSite('https://oppaisan.com/sitemap-pt-post-2024-10.xml')

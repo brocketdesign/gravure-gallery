@@ -17,8 +17,7 @@ function Home() {
 
   useEffect(() => {
     fetchImages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [page]);
 
   const fetchImages = async () => {
     if (loading) return; // Prevent multiple simultaneous requests
